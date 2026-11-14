@@ -1,5 +1,7 @@
 # provenhooks
 
+[![tests](https://github.com/PoloBongo/provenhooks/actions/workflows/test.yml/badge.svg)](https://github.com/PoloBongo/provenhooks/actions/workflows/test.yml)
+
 Claude Code hooks that ship with their test harness — and the harness itself,
 so you can point it at your own.
 
@@ -15,9 +17,16 @@ so you can point it at your own.
 A hook is a program: JSON in on stdin, an exit code out, stderr as the message.
 That is eminently testable. Almost nobody tests it.
 
-I checked the largest public collection of Claude Code templates: 444 files,
-39 hooks, **3 of them covered by any test**, and no CI job that runs them.
-Everyone ships hooks to copy. Nobody ships hooks that prove they work.
+Look through the public collections of Claude Code hooks and you find plenty
+to copy, and almost nothing that proves any of it runs. No suites, no CI.
+
+Here is what that costs, from this repository's own history. The first version
+of `stop-gate` was green on Linux and broken on macOS, where `/bin/bash` is
+still 3.2: its parser counts parentheses inside a command substitution without
+regard for quoting, so the one closing a `case` pattern ended the substitution
+early. The hook exited 1 having run nothing — no checks, no message, turn over.
+`shellcheck` is silent on it, and so is every Linux machine. A test matrix
+found it in four minutes.
 
 That gap matters because a hook fails *silently*. A `Stop` hook that overruns
 its timeout is cancelled and its output discarded — the turn ends as though
@@ -91,6 +100,8 @@ ph_summary
 | `ph_run HOOK [JSON]` | Runs the hook; sets `$RC`, `$OUT`, `$ERR`, `$DUR` |
 | `ph_contract HOOK [--event NAME] [--budget S]` | The contract above |
 | `ph_called NAME` / `ph_calls` / `ph_ncalls` | What the hook invoked, and how |
+| `ph_concurrency NAME` | How many ran at once — parallelism without timing the runner |
+| `ph_nlines` | Lines on stdin, unpadded, so the count compares equal on BSD too |
 | `ph_eq` `ph_contains` `ph_lacks` `ph_true` `ph_false` | Assertions |
 | `ph_summary` | Prints the tally, exits non-zero if anything failed |
 
