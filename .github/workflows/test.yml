@@ -19,6 +19,17 @@ jobs:
       - name: shellcheck
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y shellcheck && shellcheck -S warning lib/*.sh lib/fixtures/*.sh hooks/*/*.sh
+      - name: diagnostics (temporaire)
+        run: |
+          bash --version | head -1; git --version
+          echo "TMPDIR=[$TMPDIR]  autocrlf=$(git config --get core.autocrlf || echo unset)"
+          set -x
+          . lib/harness.sh
+          ph_repo
+          printf 'check **/*.ts npm run types\n' > .claude/stop-gate.conf
+          echo 'export const a = 1' > a.ts
+          bash -x "$OLDPWD/hooks/stop-gate/stop-gate.sh" <<< '{"stop_hook_active":false}' 2>&1 | tail -40 || echo "RC=$?"
+
       - name: harness and contract
         run: bash lib/test.sh
       - name: run every hook's test suite

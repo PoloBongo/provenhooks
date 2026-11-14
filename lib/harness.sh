@@ -31,7 +31,17 @@ trap _ht_cleanup EXIT
 
 # --- assertions ---------------------------------------------------------
 _ht_ok()   { PH_PASS=$((PH_PASS+1)); printf '    ok   %s\n' "$1"; }
-_ht_ko()   { PH_FAIL=$((PH_FAIL+1)); printf '    FAIL %s\n' "$1"; [ -n "${2:-}" ] && printf '         %s\n' "$2"; }
+_ht_ko() {
+  PH_FAIL=$((PH_FAIL+1)); printf '    FAIL %s\n' "$1"
+  [ -n "${2:-}" ] && printf '         %s\n' "$2"
+  # A hook that dies says why on stderr. Swallowing it here is how a portability
+  # bug becomes "exit 1, no idea" on a machine you don't have.
+  if [ -n "${ERR:-}" ] && [ "${ERR:-}" != "${PH_ERR_SHOWN:-}" ]; then
+    printf '%s\n' "$ERR" | sed -n '1,8p;9s/.*/         .../p' | sed 's/^/         stderr| /'
+    PH_ERR_SHOWN="$ERR"
+  fi
+  return 0
+}
 
 _ht_warn() { PH_WARN=$((PH_WARN+1)); printf '    warn %s\n' "$1"; [ -n "${2:-}" ] && printf '         %s\n' "$2"; }
 
