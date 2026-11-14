@@ -21,7 +21,7 @@ passed.
 
 ```
 # mode   glob                command
-fix      resources/**        npx prettier --write
+fix      resources/**        node_modules/.bin/prettier --write
 check    **/*.ts             npm run types
 check    **/*.php            vendor/bin/pint --test --dirty
 ```

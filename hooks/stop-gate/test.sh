@@ -61,15 +61,15 @@ ph_eq "code 0" 0 "$RC"
 ph_eq "aucune commande" 0 "$(ph_ncalls)"
 
 ph_case "une règle fix applique au lieu de bloquer"
-ph_repo; conf 'fix **/*.css npx prettier --write'
-ph_stub npx; echo 'body{}' > a.css; ph_run "$HOOK"
+ph_repo; conf 'fix **/*.css prettier --write'
+ph_stub prettier; echo 'body{}' > a.css; ph_run "$HOOK"
 ph_eq "code 0" 0 "$RC"
 ph_true "le fichier est passé à la commande" "ph_calls | grep -q '\[--write\] \[a.css\]'"
-ph_true "journal : appliqué" "grep -q 'appliqué : npx' .git/stop-gate.log"
+ph_true "journal : appliqué" "grep -q 'appliqué : prettier' .git/stop-gate.log"
 
 ph_case "une règle fix qui échoue bloque, avec le détail"
-ph_repo; conf 'fix **/*.css npx prettier --write'
-ph_stub npx --exit 2 --out "SyntaxError: Unexpected token (3:1)"
+ph_repo; conf 'fix **/*.css prettier --write'
+ph_stub prettier --exit 2 --out "SyntaxError: Unexpected token (3:1)"
 echo 'body{' > a.css; ph_run "$HOOK"
 ph_eq "code 2" 2 "$RC"
 ph_contains "stderr : le détail" "$ERR" "SyntaxError"
@@ -89,7 +89,7 @@ ph_true "la règle ts tourne" "ph_calls | grep -q 'npm \[ts\]'"
 ph_false "la règle php ne tourne pas" "ph_calls | grep -q 'npm \[php\]'"
 
 ph_case "noms de fichiers piégeux : espace, accent, renommage, suppression"
-ph_repo; conf 'fix **/*.css npx fmt'; ph_stub npx
+ph_repo; conf 'fix **/*.css fmt'; ph_stub fmt
 echo 'old{}' > old.css; echo 'gone{}' > gone.css; git add -A; git commit -qm c
 mkdir -p "dir avec espace"; echo 'body{}' > "dir avec espace/é fichier.css"
 git mv old.css new.css; rm -f gone.css; ph_reset; ph_run "$HOOK"
@@ -108,9 +108,9 @@ ph_eq   "les 3 tournent en même temps" 3 "$(ph_concurrency npm)"
 ph_true "journal : une durée par check" "grep -qE 'one=[0-9]+s two=[0-9]+s three=[0-9]+s' .git/stop-gate.log"
 
 ph_case "beaucoup de fichiers : la commande fix est appelée par paquets"
-ph_repo; conf 'fix **/*.css npx fmt'; ph_stub npx
+ph_repo; conf 'fix **/*.css fmt'; ph_stub fmt
 for i in $(seq 1 130); do echo "a{}" > "f$i.css"; done; ph_run "$HOOK"
-ph_eq "3 appels (60+60+10)" 3 "$(ph_calls | grep -c '^npx')"
+ph_eq "3 appels (60+60+10)" 3 "$(ph_calls | grep -c '^fmt')"
 ph_eq "130 fichiers au total" 130 "$(ph_calls | grep -o '\[f[0-9]*\.css\]' | sort -u | ph_nlines)"
 
 ph_case "commentaires et lignes vides ignorés"
