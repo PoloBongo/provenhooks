@@ -46,6 +46,7 @@ So every hook here comes with three things:
 | Hook | Event | What it does | Tests |
 | --- | --- | --- | --- |
 | [stop-gate](hooks/stop-gate/) | `Stop` | Replays your project's checks, applies the mechanical fixes, and stays quiet when nothing changed | 61 |
+| [secret-guard](hooks/secret-guard/) | `PreToolUse` | Refuses to write an AWS, GitHub, Slack, Stripe, Google, OpenAI or Anthropic credential, a PEM private key or a signed JWT into a file | 55 |
 
 ## Test your own hooks
 
