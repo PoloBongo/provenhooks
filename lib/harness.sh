@@ -25,6 +25,7 @@ PH_STUBS="$PH_ROOT/stubs"
 mkdir -p "$PH_STUBS"
 export PATH="$PH_STUBS:$PATH"
 export PH_CALLS="$PH_ROOT/calls.log"
+export PH_SEQ="$PH_ROOT/seq.log"
 
 _ht_cleanup() { cd /; rm -rf "$PH_ROOT"; }
 trap _ht_cleanup EXIT
@@ -74,7 +75,7 @@ ph_repo() { # ph_repo [name] -> fresh git repo, cd'd into, with one commit
   git config core.autocrlf false
   printf 'seed\n' > .seed
   git add -A && git commit -qm seed
-  : > "$PH_CALLS"
+  : > "$PH_CALLS"; : > "$PH_SEQ"
 }
 
 # --- stubbed commands ----------------------------------------------------
@@ -93,7 +94,9 @@ ph_stub() { # ph_stub <name> [--exit N] [--out TEXT] [--sleep S] [--writes FILE:
   {
     printf '#!/usr/bin/env bash\n'
     printf '{ printf "%%s" "%s"; for a in "$@"; do printf " [%%s]" "$a"; done; printf "\\n"; } >> "$PH_CALLS"\n' "$name"
+    printf 'printf "+%s\\n" >> "$PH_SEQ"\n' "$name"
     [ -n "$nap" ]    && printf 'sleep %s\n' "$nap"
+    printf 'printf -- "-%s\\n" >> "$PH_SEQ"\n' "$name"
     [ -n "$out" ]    && printf 'printf "%%s\\n" %q\n' "$out"
     [ -n "$writes" ] && printf 'printf "%%s\\n" %q > %q\n' "${writes#*:}" "${writes%%:*}"
     printf 'exit %s\n' "$code"
@@ -105,7 +108,15 @@ ph_unstub() { rm -f "$PH_STUBS/$1"; }
 ph_calls()  { cat "$PH_CALLS" 2>/dev/null; }
 ph_called() { grep -q "^$1" "$PH_CALLS" 2>/dev/null; }
 ph_ncalls() { local n; n="$(grep -c . "$PH_CALLS" 2>/dev/null)"; printf '%s' "${n:-0}"; }
-ph_reset()  { : > "$PH_CALLS"; }
+ph_reset()  { : > "$PH_CALLS"; : > "$PH_SEQ"; }
+
+# How many of these ran at the same time. Wall-clock proves parallelism only
+# on a machine whose fork is cheap: Cygwin's is not, and a threshold that
+# passes on Linux measures the runner, not the hook.
+ph_concurrency() { # ph_concurrency <name> -> largest number running at once
+  awk -v n="$1" '$0=="+" n {c++; if (c>m) m=c} $0=="-" n {c--} END {print m+0}' \
+    "$PH_SEQ" 2>/dev/null || printf 0
+}
 
 # --- running the hook ----------------------------------------------------
 # Sets RC (exit code), OUT (stdout), ERR (stderr), DUR (seconds) for the caller.

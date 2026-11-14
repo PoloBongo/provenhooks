@@ -50,7 +50,10 @@ entries=""; changed=""
 scan() {
   entries="$(git status --porcelain=v1 -uall -z 2>/dev/null | while IFS= read -r -d '' e; do
     printf '%s\t%s\n' "${e:0:2}" "${e:3}"
-    case "${e:0:2}" in R?|C?|?R|?C) IFS= read -r -d '' from && printf '<-\t%s\n' "$from" ;; esac
+    # The leading ( is not decoration: bash 3.2, still /bin/bash on macOS,
+    # counts parentheses naively inside $( ) and takes the one closing a case
+    # pattern as the end of the substitution.
+    case "${e:0:2}" in (R?|C?|?R|?C) IFS= read -r -d '' from && printf '<-\t%s\n' "$from" ;; esac
   done)"
   changed="$(printf '%s\n' "$entries" | cut -f2- | sort -u | grep -v '^$')"
 }

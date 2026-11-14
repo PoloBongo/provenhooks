@@ -104,7 +104,7 @@ ph_case "les checks tournent en parallèle"
 ph_repo; conf 'check **/*.ts npm one' 'check **/*.ts npm two' 'check **/*.ts npm three'
 ph_stub npm --sleep 2; echo 'x' > a.ts; ph_run "$HOOK"
 ph_eq "code 0" 0 "$RC"
-ph_true "≈2 s et non 6 (mesuré ${DUR}s)" "[ '$DUR' -le 4 ]"
+ph_eq   "les 3 tournent en même temps" 3 "$(ph_concurrency npm)"
 ph_true "journal : une durée par check" "grep -qE 'one=[0-9]+s two=[0-9]+s three=[0-9]+s' .git/stop-gate.log"
 
 ph_case "beaucoup de fichiers : la commande fix est appelée par paquets"
