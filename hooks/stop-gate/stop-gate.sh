@@ -117,9 +117,14 @@ did=""; timings=""; n=0
 while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in (''|'#'*) continue ;; esac
   # mode, glob, then the rest of the line verbatim as the command.
-  read -r mode glob cmd <<EOF
-$line
-EOF
+  # set -f before splitting: the glob column holds things like **/*.ts, and
+  # without it the shell would expand them against the working directory.
+  # Splitting positionally rather than with a here-document also keeps the
+  # parse unambiguous — where a here-document ends depends on quoting and
+  # expansion context that not every shell settles the same way.
+  set -f; set -- $line; set +f
+  mode="${1:-}"; glob="${2:-}"; cmd=""
+  [ $# -gt 2 ] && { shift 2; cmd="$*"; }
   [ -z "$mode" ] || [ -z "$glob" ] || [ -z "$cmd" ] && continue
 
   files="$(matched_files "$glob")"
