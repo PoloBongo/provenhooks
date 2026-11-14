@@ -154,7 +154,11 @@ while [ "$i" -lt "$n" ]; do
   rc=1; secs='?'
   [ -s "$tmp/$i.rc" ] && read -r rc secs < "$tmp/$i.rc"
   cmd=""; read -r cmd < "$tmp/$i.cmd"
-  timings="$timings ${cmd##* }=${secs}s"
+  # Label the check by its last word — "npm run types" becomes types — but
+  # fall back to the first when that word is an option: "tsc --noEmit" reads
+  # better as tsc than as --noEmit.
+  label="${cmd##* }"; case "$label" in (-*) label="${cmd%% *}" ;; esac
+  timings="$timings ${label}=${secs}s"
   if [ "$rc" != "0" ]; then
     printf '\n- `%s` échoue :\n' "$cmd" >>"$problems"
     tail -n 12 "$tmp/$i.out" >>"$problems" 2>/dev/null

@@ -118,6 +118,12 @@ ph_repo; conf '# un commentaire' '' 'check **/*.ts npm ts'; ph_stub npm; echo 'x
 ph_eq "code 0" 0 "$RC"
 ph_eq "une seule commande" 1 "$(ph_ncalls)"
 
+ph_case "le journal nomme le check lisiblement"
+ph_repo; conf 'check **/*.ts tsc --noEmit' 'check **/*.ts npm run types'
+ph_stub tsc; ph_stub npm; echo 'x' > a.ts; ph_run "$HOOK"
+ph_true "une option ne sert pas d'étiquette" "grep -q 'tsc=' .git/stop-gate.log"
+ph_true "le dernier mot sert quand il est parlant" "grep -q 'types=' .git/stop-gate.log"
+
 ph_case "journal borné à 200 lignes"
 ph_repo; conf 'check **/*.ts npm ts'; ph_stub npm
 for i in $(seq 1 250); do echo "ligne $i"; done > .git/stop-gate.log

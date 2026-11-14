@@ -46,7 +46,7 @@ So every hook here comes with three things:
 | Hook | Event | What it does | Tests | Installing the plugin |
 | --- | --- | --- | --- | --- |
 | [secret-guard](hooks/secret-guard/) | `PreToolUse` | Refuses to write an AWS, GitHub, Slack, Stripe, Google, OpenAI or Anthropic credential, a PEM private key or a signed JWT into a file | 55 | registers it |
-| [stop-gate](hooks/stop-gate/) | `Stop` | Replays your project's checks, applies the mechanical fixes, and stays quiet when nothing changed | 61 | [wire it yourself](hooks/stop-gate/#install) |
+| [stop-gate](hooks/stop-gate/) | `Stop` | Replays your project's checks, applies the mechanical fixes, and stays quiet when nothing changed | 63 | [wire it yourself](hooks/stop-gate/#install) |
 
 `secret-guard` works the moment it is installed and needs no configuration, so
 the plugin registers it. `stop-gate` runs the checks named in a per-project

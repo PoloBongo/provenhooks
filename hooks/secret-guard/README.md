@@ -66,6 +66,12 @@ cannot see a secret that reaches the file by another route — a `Bash`
 heredoc, an editor, a colleague. It covers the one path Claude Code writes
 through, which is the path you are adding when you let an agent edit files.
 
+It also matches a credential written whole. A key split across a
+concatenation — `'AKIA' . 'Q3RJ…'` — goes through, as I found by mangling my
+own demo. That is the right trade: this guards against the accident, which is
+what actually happens, and nothing here would stop someone determined to get
+a secret past it.
+
 ## Tests
 
 ```bash
