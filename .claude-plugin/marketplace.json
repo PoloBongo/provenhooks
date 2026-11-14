@@ -1,0 +1,13 @@
+{
+  "name": "provenhooks",
+  "owner": {
+    "name": "Arthur Bru"
+  },
+  "plugins": [
+    {
+      "name": "provenhooks",
+      "source": ".",
+      "description": "Hooks that ship with their test harness."
+    }
+  ]
+}
