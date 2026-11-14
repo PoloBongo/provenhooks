@@ -10,5 +10,8 @@
     "hooks",
     "testing",
     "quality-gates"
-  ]
+  ],
+  "icon": "./.claude-plugin/icon.png",
+  "homepage": "https://github.com/PoloBongo/provenhooks",
+  "repository": "https://github.com/PoloBongo/provenhooks"
 }

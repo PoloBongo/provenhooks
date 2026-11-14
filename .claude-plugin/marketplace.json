@@ -1,5 +1,6 @@
 {
   "name": "provenhooks",
+  "description": "Claude Code hooks that ship with their test harness, plus the harness so you can test your own.",
   "owner": {
     "name": "Arthur Bru"
   },
@@ -7,7 +8,8 @@
     {
       "name": "provenhooks",
       "source": ".",
-      "description": "Hooks that ship with their test harness."
+      "description": "Claude Code hooks that ship with their test harness, and the harness itself.",
+      "version": "0.1.0"
     }
   ]
 }
