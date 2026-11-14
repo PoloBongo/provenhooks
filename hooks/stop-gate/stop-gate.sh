@@ -46,13 +46,18 @@ log="${gitdir:+$gitdir/stop-gate.log}"
 
 # --- what changed --------------------------------------------------------
 # -z keeps paths raw (spaces, accents); -uall lists files inside new folders.
+#
+# Two notes on the shell inside the command substitution below, both learned
+# from macOS, where /bin/bash is still 3.2. Its parser scans the text of a
+# substitution counting parentheses, without regard for quoting or comments:
+#   - the case pattern carries a leading open parenthesis, so the one that
+#     closes it is balanced and does not end the substitution early;
+#   - keep prose out of there entirely. A lone parenthesis in a comment,
+#     even this explanation, swallows the rest of the file.
 entries=""; changed=""
 scan() {
   entries="$(git status --porcelain=v1 -uall -z 2>/dev/null | while IFS= read -r -d '' e; do
     printf '%s\t%s\n' "${e:0:2}" "${e:3}"
-    # The leading ( is not decoration: bash 3.2, still /bin/bash on macOS,
-    # counts parentheses naively inside $( ) and takes the one closing a case
-    # pattern as the end of the substitution.
     case "${e:0:2}" in (R?|C?|?R|?C) IFS= read -r -d '' from && printf '<-\t%s\n' "$from" ;; esac
   done)"
   changed="$(printf '%s\n' "$entries" | cut -f2- | sort -u | grep -v '^$')"
