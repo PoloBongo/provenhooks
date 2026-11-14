@@ -111,7 +111,7 @@ ph_case "beaucoup de fichiers : la commande fix est appelée par paquets"
 ph_repo; conf 'fix **/*.css npx fmt'; ph_stub npx
 for i in $(seq 1 130); do echo "a{}" > "f$i.css"; done; ph_run "$HOOK"
 ph_eq "3 appels (60+60+10)" 3 "$(ph_calls | grep -c '^npx')"
-ph_eq "130 fichiers au total" 130 "$(ph_calls | grep -o '\[f[0-9]*\.css\]' | sort -u | wc -l)"
+ph_eq "130 fichiers au total" 130 "$(ph_calls | grep -o '\[f[0-9]*\.css\]' | sort -u | ph_nlines)"
 
 ph_case "commentaires et lignes vides ignorés"
 ph_repo; conf '# un commentaire' '' 'check **/*.ts npm ts'; ph_stub npm; echo 'x' > a.ts; ph_run "$HOOK"
@@ -122,7 +122,7 @@ ph_case "journal borné à 200 lignes"
 ph_repo; conf 'check **/*.ts npm ts'; ph_stub npm
 for i in $(seq 1 250); do echo "ligne $i"; done > .git/stop-gate.log
 echo 'x' > a.ts; ph_run "$HOOK"
-ph_eq "200 lignes" 200 "$(wc -l < .git/stop-gate.log)"
+ph_eq "200 lignes" 200 "$(ph_nlines < .git/stop-gate.log)"
 
 ph_case "empreinte incalculable : jamais de faux « déjà vu »"
 ph_repo; conf 'check **/*.ts npm ts'; ph_stub npm; echo 'x' > a.ts

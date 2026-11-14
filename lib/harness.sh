@@ -106,6 +106,11 @@ ph_stub() { # ph_stub <name> [--exit N] [--out TEXT] [--sleep S] [--writes FILE:
 
 ph_unstub() { rm -f "$PH_STUBS/$1"; }
 ph_calls()  { cat "$PH_CALLS" 2>/dev/null; }
+
+# Lines on stdin. BSD wc pads its number with spaces, so "$(wc -l)" compares
+# unequal to 130 on macOS and equal on Linux; count without wc and the
+# assertion means the same thing everywhere.
+ph_nlines() { local n=0; while IFS= read -r _; do n=$((n+1)); done; printf '%s' "$n"; }
 ph_called() { grep -q "^$1" "$PH_CALLS" 2>/dev/null; }
 ph_ncalls() { local n; n="$(grep -c . "$PH_CALLS" 2>/dev/null)"; printf '%s' "${n:-0}"; }
 ph_reset()  { : > "$PH_CALLS"; : > "$PH_SEQ"; }
